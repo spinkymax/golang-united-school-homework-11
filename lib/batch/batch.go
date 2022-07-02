@@ -15,6 +15,7 @@ func getOne(id int64) user {
 }
 
 func getBatch(n int64, pool int64) (res []user) {
+	var mu sync.Mutex
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, pool)
 
@@ -24,7 +25,9 @@ func getBatch(n int64, pool int64) (res []user) {
 
 		go func(j int64) {
 			user := getOne(j)
+			mu.Lock()
 			res = append(res, user)
+			mu.Unlock()
 			<-sem
 			wg.Done()
 		}(i)
